@@ -1,6 +1,7 @@
 # ! Make sure:
 # IDS col is added before saving 
 
+import argparse, textwrap
 import numpy as np
 import pandas as pd
 from sklearn import datasets
@@ -90,12 +91,42 @@ def create_regression_folds(data, k, shuffled=False):
 
 
 
+# =======================================================================================================================================
+# beg: arg parser
+# =======================================================================================================================================
+ap = argparse.ArgumentParser(
+      prog='MakeKFold',
+      description="Make kfold column for preprocessed classification / regression dataset",
+      formatter_class=argparse.RawDescriptionHelpFormatter,
+      epilog=textwrap.dedent('''\
+        Usage:
+            python3 check-jira.py -kpp <project-prefix> 
+        Examples:
+            python3 check-jira.py -kpp myprojectpredix 
+        Requirements:
+            
+         '''))
+
+ap.add_argument("-k", "--k", required=True, type=int, help="k in kfold")
+ap.add_argument("-t", "--type-of-problem", required=True, type=str, help="classification or regression")
+ap.add_argument("-s", "--return-shuffled", required=True, type=str, help="Time seies False, else True")
+ap.add_argument("-i", "--add-ids-col", required=True, type=str, help="Returns df with IDS col for merging back if True")
+ap.add_argument("-f", "--preprocessed-file", required=True, type=str, help="Name of preprocessed csv file in input dir")
+
+args = vars(ap.parse_args())
+# print(args)
+# =======================================================================================================================================
+# end: arg parser
+# =======================================================================================================================================
+
+
 
 if __name__ == "__main__":
-
-    df = pd.read_csv('inputs/train_clean.csv')
-    df = create_regression_folds(df, k=5, shuffled=True)
-    #df = create_classification_folds(df, k=5, shuffled=True)
+    
+    df = pd.read_csv(f'inputs/{args.preprocessed_file}')
+    if args.type_of_problem == 'classification':
+        df = create_classification_folds(df, k=5, shuffled=True)
+    # df = create_classification_folds(df, k=5, shuffled=True)
     
     # print(df.skew())
 
