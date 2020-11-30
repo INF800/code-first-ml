@@ -1,4 +1,4 @@
-# ! Make sure:
+# Make sure:
 # IDS col is added before saving 
 
 import argparse, textwrap
@@ -110,11 +110,11 @@ ap = argparse.ArgumentParser(
 ap.add_argument("-k", "--k", required=True, type=int, help="k in kfold")
 ap.add_argument("-t", "--type-of-problem", required=True, type=str, help="classification or regression")
 ap.add_argument("-s", "--return-shuffled", required=True, type=str, help="Time seies False, else True")
-ap.add_argument("-i", "--add-ids-col", required=True, type=str, help="Returns df with IDS col for merging back if True")
+ap.add_argument("-i", "--add-id-col", required=True, type=str, help="Returns df with IDS col for merging back if True")
 ap.add_argument("-f", "--preprocessed-file", required=True, type=str, help="Name of preprocessed csv file in input dir")
 
 args = vars(ap.parse_args())
-# print(args)
+print(args)
 # =======================================================================================================================================
 # end: arg parser
 # =======================================================================================================================================
@@ -122,11 +122,24 @@ args = vars(ap.parse_args())
 
 
 if __name__ == "__main__":
-    
-    df = pd.read_csv(f'inputs/{args.preprocessed_file}')
-    if args.type_of_problem == 'classification':
-        df = create_classification_folds(df, k=5, shuffled=True)
-    # df = create_classification_folds(df, k=5, shuffled=True)
+    str2bool = lambda x:  True if x in ['true', 'True', 1] else False
+
+    k = args['k']
+    t = args['type_of_problem']
+    s = args['return_shuffled'] # str. Not bool.
+    i = args['add_id_col'] # str. Not bool.
+    f = args['preprocessed_file']
+
+    df = pd.read_csv(f'input/{f}')
+    s = str2bool(s)
+    i = str2bool(i)
+
+    if t == 'classification':
+        df = create_classification_folds(df, k=k, shuffled=s)
+    elif t == 'regression':
+        df = create_regression_folds(df, k=k, shuffled=s)
+    else:
+        raise Exception('Type must be either regression or classification')
     
     # print(df.skew())
 
@@ -135,4 +148,4 @@ if __name__ == "__main__":
     """
 
     df["IDS"] = list(range(len(df)))
-    df.to_csv("inputs/train_folds.csv", index=False)
+    df.to_csv("input/train_folds.csv")
